@@ -1,27 +1,30 @@
 import React from 'react';
 import { Feather } from '@expo/vector-icons'
-import { useNavigation } from "@react-navigation/native";
-import { Image, Text, View, TouchableOpacity, FlatList, Linking } from 'react-native';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { Image, Text, View, TouchableOpacity, Linking, ActivityIndicatorComponent } from 'react-native';
 import * as MailComposer from 'expo-mail-composer'
 import logoImg from "../../assets/logo.png";
 import styles from './styles'
 
 export default function Detail() {
   const navigation = useNavigation();
-  const message = 'Olá APAD, estou entrando em contato pois gostaria de ajudar no caso "Blabla".'
+  const route = useRoute();
+  const { incident } = route.params
+  const formatedValue = Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'}).format(incident.value)
+  const message = `Olá ${incident.name}, estou entrando em contato pois gostaria de ajudar no caso "${incident.title}" com o valor de ${formatedValue}.`
 
   function navigateToIncidents(){
     navigation.navigate('Incidents');
   }
 
   function sendWpp(){
-    Linking.openURL(`whatsapp://send?phone=+5531988886549&text=${message}`)
+    Linking.openURL(`whatsapp://send?phone=${incident.whatsapp}&text=${message}`)
   }
 
   function sendMail(){
     MailComposer.composeAsync({
       subject: 'titulo',
-      recipients: ['a@b.com'],
+      recipients: [incident.email],
       body: message,
     })
   }
@@ -40,16 +43,16 @@ export default function Detail() {
 
       <View style={styles.incident} >
         <Text style={styles.property}>ONG:</Text>
-        <Text style={styles.value}>APAD</Text>
+        <Text style={styles.value}>{incident.name} de {incident.city}/{incident.uf}</Text>
 
         <Text style={styles.property}>CASO:</Text>
-        <Text style={styles.value}>blablabla</Text>
+        <Text style={styles.value}>{incident.title}</Text>
         
         <Text style={styles.property}>DESCRIÇÃO:</Text>
-        <Text style={styles.value}>blablabla</Text>
+        <Text style={styles.value}>{incident.description}</Text>
 
         <Text style={styles.property}>VALOR:</Text>
-        <Text style={[styles.value, {marginBottom: 0}]}>R$ 120,00</Text>
+        <Text style={[styles.value, {marginBottom: 0}]}>{formatedValue}</Text>
       </View>
 
       <View style={styles.contactBox}>
